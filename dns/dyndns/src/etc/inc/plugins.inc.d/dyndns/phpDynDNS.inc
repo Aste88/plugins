@@ -802,6 +802,7 @@ class updatedns
             case 'cloudflare-token-v6':
                 $baseUrl = 'https://api.cloudflare.com/client/v4';
                 $fqdn = str_replace(' ', '', $this->_dnsHost);
+                $resourceid = trim($this->_dnsResourceID);
                 $recordType = ($this->_useIPv6) ? 'AAAA' : 'A';
                 $ttlData = intval($this->_dnsTTL) < 1 ? 1 : intval($this->_dnsTTL);
                 $hostData = array(
@@ -849,18 +850,19 @@ class updatedns
 
                 if ($zoneId) { // If zone ID was found get host ID
                     $dnsRecordsUrl = "$zonesUrl/$zoneId/dns_records";
-                    $getHostId = "$dnsRecordsUrl?name=$fqdn&type=$recordType";
+                    $getHostId = ($resourceid  !== '') ? "$dnsRecordsUrl/$resourceid" : "$dnsRecordsUrl?name=$fqdn&type=$recordType";
                     curl_setopt($ch, CURLOPT_URL, $getHostId);
                     $output = json_decode(curl_exec($ch));
-                    $recordCount = !empty($output->result) ? count($output->result) : 0;
-                    if ($recordCount === 0) {
+                    $records = is_array($output->result) ? $output->result : array($output->result);
+                    $recordCount = !empty($records) ? count($records) : 0;
+                    if ($recordCount === 0 && $resourceid  === '') {
                         // create record
                         curl_setopt($ch, CURLOPT_URL, $dnsRecordsUrl);
                         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
                     } elseif ($recordCount >= 1) {
                         // update record
-                        $recordId = $output->result[0]->id;
-                        $hostData["proxied"] = $output->result[0]->proxied;
+                        $recordId = $records[0]->id;
+                        $hostData["proxied"] = $records[0]->proxied;
                         curl_setopt($ch, CURLOPT_URL, "$dnsRecordsUrl/$recordId");
                         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                     }

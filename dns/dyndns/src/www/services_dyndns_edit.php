@@ -398,12 +398,13 @@ include("head.inc");
                       </div>
                     </td>
                   </tr>
-                  <tr class="opt_field type_azure">
+                  <tr class="opt_field type_azure type_cloudflare">
                     <td><a id="help_for_resourceid" href="#" class="showhelp"><i class="fa fa-info-circle"></i></a> <?= gettext('Resource Id') ?></td>
                     <td>
                       <input name="resourceid" type="text" id="resourceid" value="<?= $pconfig['resourceid'] ?>" />
                       <div class="hidden" data-for="help_for_resourceid">
-                        <?= gettext("Enter the resource id of the DNS Zone in Azure.") ?>
+                        <?= gettext("Azure: Enter the resource id of the DNS Zone.") ?>
+                        <br /><?= gettext('Cloudflare: Enter the record id of the to update (first is updated if empty).') ?>
                       </div>
                     </td>
                   </tr>
